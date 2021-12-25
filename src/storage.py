@@ -1,15 +1,17 @@
 
 import numpy as np
-import tensorflow as tf
 from pathlib import Path
-import pandas as pd
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.layers import TextVectorization
-from keras.backend import clear_session
 import matplotlib.pyplot as plt
+import pandas as pd
 
-# Reset weights of last training
-clear_session()
+if False:
+    from tensorflow.keras.layers import TextVectorization
+    from keras.backend import clear_session
+    import tensorflow as tf
+
+    # Reset weights of last training
+    clear_session()
 
 filepath = Path(
     'data/victorian_era/dataset/Gungor_2018_VictorianAuthorAttribution_data-train.csv')
@@ -23,6 +25,14 @@ train, test = train_test_split(data, test_size=0.2)
 
 
 # Code from https://keras.io/examples/nlp/text_classification_from_scratch/
+
+
+def split_data(filepath, split=0.2):
+    data = pd.read_csv(filepath, encoding="ISO-8859-1")
+
+    train, test = train_test_split(data, test_size=split)
+
+    return train, test
 
 
 if False:
