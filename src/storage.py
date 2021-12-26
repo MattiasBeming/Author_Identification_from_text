@@ -26,6 +26,9 @@ train, test = train_test_split(data, test_size=0.2)
 
 # Code from https://keras.io/examples/nlp/text_classification_from_scratch/
 
+def read_data(filepath):
+    data = pd.read_csv(filepath, encoding="ISO-8859-1")
+    return data
 
 def split_data(filepath, split=0.2):
     data = pd.read_csv(filepath, encoding="ISO-8859-1")
