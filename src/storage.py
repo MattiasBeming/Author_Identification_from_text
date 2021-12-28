@@ -34,7 +34,10 @@ def read_data(filepath):
 def split_data(filepath, split=0.2):
     data = pd.read_csv(filepath, encoding="ISO-8859-1")
 
-    train, test = train_test_split(data, test_size=split)
+    # stratify:
+    # rel. class frequencies is approx. preserved in each train, test fold
+    train, test = train_test_split(
+        data, test_size=split, stratify=data.author)
 
     return train, test
 

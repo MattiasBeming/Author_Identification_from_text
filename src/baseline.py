@@ -127,21 +127,26 @@ filepath = Path(
 if False:
     data = read_data(filepath)
     data_os = oversample(data)
-    train, test = train_test_split(data_os, test_size=0.2)
+    train, test = train_test_split(
+        data_os, test_size=0.2, stratify=data_os.author)
+    naive_classification(train, test)
+    bar_plot(data_os)
     naive_classification(train, test)
 
 # Undersampling
 if False:
     data = read_data(filepath)
     data_us = undersample(data)
-    train, test = train_test_split(data_us, test_size=0.2)
+    train, test = train_test_split(
+        data_us, test_size=0.2, stratify=data_us.author)
     naive_classification(train, test)
 
 # Over-undersampling
 if False:
     data = read_data(filepath)
     data_ous = over_undersampling(data)
-    train, test = train_test_split(data_ous, test_size=0.2)
+    train, test = train_test_split(
+        data_ous, test_size=0.2, stratify=data_ous.author)
     naive_classification(train, test)
 
 # Standard
