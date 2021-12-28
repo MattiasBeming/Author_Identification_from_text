@@ -30,6 +30,7 @@ def read_data(filepath):
     data = pd.read_csv(filepath, encoding="ISO-8859-1")
     return data
 
+
 def split_data(filepath, split=0.2):
     data = pd.read_csv(filepath, encoding="ISO-8859-1")
 
