@@ -1,22 +1,11 @@
 
-from storage import *
+# from storage import *
 import matplotlib.pyplot as plt
 from utils import VectorizationMode as VM
-
-##### Setup #####
-
+import numpy as np
+import pandas as pd
 from pathlib import Path
-import nltk
 
-download_path = Path('E:/Projects/Author_Identification/data/nltk')
-nltk.data.path.append(download_path)
-
-nltk.download('punkt', download_dir=download_path)
-nltk.download('wordnet', download_dir=download_path)
-nltk.download('omw-1.4', download_dir=download_path)
-nltk.download('stopwords')
-
-print("\nBaseline running...")
 
 ##### Preprocess #####
 
@@ -29,7 +18,7 @@ class LemmaTokenizer:
         return [self.wnl.lemmatize(t) for t in word_tokenize(doc)]
 
 
-##### Pipe etc #####
+##### Pipe #####
 
 def define_pipe(mode=VM.COUNT, lemma=False, stop_words=False):
     from sklearn.pipeline import Pipeline
@@ -38,23 +27,9 @@ def define_pipe(mode=VM.COUNT, lemma=False, stop_words=False):
     if stop_words:
         from nltk.corpus import stopwords
         stop_w = stopwords.words('english')
-
-    if lemma:
-        if stop_words:
-            print("lemma:", lemma, " stop_words:", stop_words)
-        else:
-            print("lemma:", lemma, " stop_words:", stop_words)
-    else:
-        if stop_words:
-            print("lemma:", lemma, " stop_words:", stop_words)
-        else:
-            print("lemma:", lemma, " stop_words:", stop_words)
-    
     
     if mode == VM.COUNT:
-        print("Count vectorizer")
         from sklearn.feature_extraction.text import CountVectorizer
-
 
         if lemma:
             if stop_words:
@@ -68,7 +43,6 @@ def define_pipe(mode=VM.COUNT, lemma=False, stop_words=False):
                 pipe = Pipeline([('CV', CountVectorizer()), ('MNB', MultinomialNB())])
         
     elif mode == VM.TFIDF:
-        print("Tfidf vectorizer")
         from sklearn.feature_extraction.text import TfidfVectorizer
 
         if lemma:
@@ -84,7 +58,6 @@ def define_pipe(mode=VM.COUNT, lemma=False, stop_words=False):
 
     return pipe
     
-
 
 ##### Classification #####
 
@@ -126,23 +99,24 @@ def naive_classification_old(train, test, mode=VM.COUNT):
     print(res)
     return res
 
+
 def naive_classification(train, test, pipe):
-    print("Classification")
+    pipe.fit(train.text, train.author)
+    return pipe.predict(test.text)
+    
+def get_class_rep(train, test, predictions):
     from sklearn.metrics import classification_report
 
-    pipe.fit(train.text, train.author)
-
-    predictions = pipe.predict(test.text)
     author_labels = sorted(train.author.unique())
     res = classification_report(
         test.author, predictions, labels=author_labels)
 
-    return res  #["accuracy"]
+    return res
+
 
 ##### Over under-spamling #####
 
 def oversample(data):
-    print("Oversampling")
     from imblearn.over_sampling import RandomOverSampler
     ros = RandomOverSampler(random_state=69)
 
@@ -162,7 +136,6 @@ def oversample(data):
 
 
 def undersample(data):
-    print("Undersampling")
     from imblearn.under_sampling import RandomUnderSampler
     rus = RandomUnderSampler(random_state=69)
 
@@ -215,44 +188,6 @@ def bar_plot(data, title=""):
 # https://github.com/scikit-learn-contrib/imbalanced-learn
 # TODO: They want citation in paper!
 
-filepath = Path(
-    'data/victorian_era/dataset/Gungor_2018_VictorianAuthorAttribution_data-train.csv')
-
-# Oversampling
-if False:
-    data = read_data(filepath)
-    data_os = oversample(data)
-    train, test = train_test_split(
-        data_os, test_size=0.2, stratify=data_os.author)
-    naive_classification(train, test)
-    bar_plot(data_os)
-    naive_classification(train, test)
-
-# Undersampling
-if False:
-    data = read_data(filepath)
-    data_us = undersample(data)
-    train, test = train_test_split(
-        data_us, test_size=0.2, stratify=data_us.author)
-    naive_classification(train, test)
-
-# Over-undersampling
-if False:
-    data = read_data(filepath)
-    data_ous = over_undersampling(data)
-    train, test = train_test_split(
-        data_ous, test_size=0.2, stratify=data_ous.author)
-    naive_classification(train, test)
-
-# Standard
-if True:
-    train, test = split_data(filepath, 0.2)
-    train = train.iloc[0:100]
-    test = test.iloc[0:100]
-    
-    pipe = define_pipe(mode=VM.COUNT, lemma=False, stop_words=True)
-    acc = naive_classification(train, test, pipe)
-    print("Accuracy: ", acc)
 
 # Standard
 # tfidf - 0.51
