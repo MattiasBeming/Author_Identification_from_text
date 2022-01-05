@@ -3,10 +3,92 @@ from storage import *
 import matplotlib.pyplot as plt
 from utils import VectorizationMode as VM
 
+##### Setup #####
+
+from pathlib import Path
+import nltk
+
+download_path = Path('E:/Projects/Author_Identification/data/nltk')
+nltk.data.path.append(download_path)
+
+nltk.download('punkt', download_dir=download_path)
+nltk.download('wordnet', download_dir=download_path)
+nltk.download('omw-1.4', download_dir=download_path)
+nltk.download('stopwords')
+
+print("\nBaseline running...")
+
+##### Preprocess #####
+
+from nltk import word_tokenize          
+from nltk.stem import WordNetLemmatizer 
+class LemmaTokenizer:
+    def __init__(self):
+        self.wnl = WordNetLemmatizer()
+    def __call__(self, doc):
+        return [self.wnl.lemmatize(t) for t in word_tokenize(doc)]
+
+
+##### Pipe etc #####
+
+def define_pipe(mode=VM.COUNT, lemma=False, stop_words=False):
+    from sklearn.pipeline import Pipeline
+    from sklearn.naive_bayes import MultinomialNB
+
+    if stop_words:
+        from nltk.corpus import stopwords
+        stop_w = stopwords.words('english')
+
+    if lemma:
+        if stop_words:
+            print("lemma:", lemma, " stop_words:", stop_words)
+        else:
+            print("lemma:", lemma, " stop_words:", stop_words)
+    else:
+        if stop_words:
+            print("lemma:", lemma, " stop_words:", stop_words)
+        else:
+            print("lemma:", lemma, " stop_words:", stop_words)
+    
+    
+    if mode == VM.COUNT:
+        print("Count vectorizer")
+        from sklearn.feature_extraction.text import CountVectorizer
+
+
+        if lemma:
+            if stop_words:
+                pipe = Pipeline([('CV', CountVectorizer(tokenizer=LemmaTokenizer(), stop_words=stop_w)), ('MNB', MultinomialNB())])
+            else:
+                pipe = Pipeline([('CV', CountVectorizer(tokenizer=LemmaTokenizer())), ('MNB', MultinomialNB())])
+        else:
+            if stop_words:
+                pipe = Pipeline([('CV', CountVectorizer(stop_words=stop_w)), ('MNB', MultinomialNB())])
+            else:
+                pipe = Pipeline([('CV', CountVectorizer()), ('MNB', MultinomialNB())])
+        
+    elif mode == VM.TFIDF:
+        print("Tfidf vectorizer")
+        from sklearn.feature_extraction.text import TfidfVectorizer
+
+        if lemma:
+            if stop_words:
+                pipe = Pipeline([('CV', TfidfVectorizer(tokenizer=LemmaTokenizer(), stop_words=stop_w)), ('MNB', MultinomialNB())])
+            else:
+                pipe = Pipeline([('CV', TfidfVectorizer(tokenizer=LemmaTokenizer())), ('MNB', MultinomialNB())])
+        else:
+            if stop_words:
+                pipe = Pipeline([('CV', TfidfVectorizer(stop_words=stop_w)), ('MNB', MultinomialNB())])
+            else:
+                pipe = Pipeline([('CV', TfidfVectorizer()), ('MNB', MultinomialNB())])
+
+    return pipe
+    
+
 
 ##### Classification #####
 
-def naive_classification(train, test, mode=VM.COUNT):
+def naive_classification_old(train, test, mode=VM.COUNT):
     print("Classification")
     from sklearn.pipeline import Pipeline
     from sklearn.naive_bayes import MultinomialNB
@@ -15,6 +97,7 @@ def naive_classification(train, test, mode=VM.COUNT):
     if mode == VM.COUNT:
         print("Count vectorizer")
         from sklearn.feature_extraction.text import CountVectorizer
+        # pipe = Pipeline([('CV', CountVectorizer(tokenizer=LemmaTokenizer())), ('MNB', MultinomialNB())])
         pipe = Pipeline([('CV', CountVectorizer()), ('MNB', MultinomialNB())])
 
         pipe.fit(train.text, train.author)
@@ -43,6 +126,18 @@ def naive_classification(train, test, mode=VM.COUNT):
     print(res)
     return res
 
+def naive_classification(train, test, pipe):
+    print("Classification")
+    from sklearn.metrics import classification_report
+
+    pipe.fit(train.text, train.author)
+
+    predictions = pipe.predict(test.text)
+    author_labels = sorted(train.author.unique())
+    res = classification_report(
+        test.author, predictions, labels=author_labels)
+
+    return res  #["accuracy"]
 
 ##### Over under-spamling #####
 
@@ -152,8 +247,17 @@ if False:
 # Standard
 if True:
     train, test = split_data(filepath, 0.2)
-    # print(train.iloc[0:1])
-    naive_classification(train, test, VM.TFIDF)
+    train = train.iloc[0:100]
+    test = test.iloc[0:100]
+    
+    pipe = define_pipe(mode=VM.COUNT, lemma=False, stop_words=True)
+    acc = naive_classification(train, test, pipe)
+    print("Accuracy: ", acc)
+
+# Standard
+# tfidf - 0.51
+# count - 0.87
+# count,lemma - 0.85
 
 
 if False:
@@ -163,10 +267,3 @@ if False:
 # TODO: look at this
 # https://www.kaggle.com/colearninglounge/nlp-data-preprocessing-and-cleaning
 
-if False:
-    from sklearn.feature_extraction.text import TfidfVectorizer
-    train, test = split_data(filepath, 0.2)
-
-    tfidf_vect = TfidfVectorizer()  # stop_words='english')
-    train_tfidf = tfidf_vect.fit_transform(train.text)
-    print(train_tfidf)
