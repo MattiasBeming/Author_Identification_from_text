@@ -9,11 +9,14 @@ from pathlib import Path
 
 ##### Preprocess #####
 
-from nltk import word_tokenize          
-from nltk.stem import WordNetLemmatizer 
+from nltk import word_tokenize
+from nltk.stem import WordNetLemmatizer
+
+
 class LemmaTokenizer:
     def __init__(self):
         self.wnl = WordNetLemmatizer()
+
     def __call__(self, doc):
         return [self.wnl.lemmatize(t) for t in word_tokenize(doc)]
 
@@ -27,37 +30,45 @@ def define_pipe(mode=VM.COUNT, lemma=False, stop_words=False):
     if stop_words:
         from nltk.corpus import stopwords
         stop_w = stopwords.words('english')
-    
+
     if mode == VM.COUNT:
         from sklearn.feature_extraction.text import CountVectorizer
 
         if lemma:
             if stop_words:
-                pipe = Pipeline([('CV', CountVectorizer(tokenizer=LemmaTokenizer(), stop_words=stop_w)), ('MNB', MultinomialNB())])
+                pipe = Pipeline([('CV', CountVectorizer(
+                    tokenizer=LemmaTokenizer(), stop_words=stop_w)), ('MNB', MultinomialNB())])
             else:
-                pipe = Pipeline([('CV', CountVectorizer(tokenizer=LemmaTokenizer())), ('MNB', MultinomialNB())])
+                pipe = Pipeline(
+                    [('CV', CountVectorizer(tokenizer=LemmaTokenizer())), ('MNB', MultinomialNB())])
         else:
             if stop_words:
-                pipe = Pipeline([('CV', CountVectorizer(stop_words=stop_w)), ('MNB', MultinomialNB())])
+                pipe = Pipeline(
+                    [('CV', CountVectorizer(stop_words=stop_w)), ('MNB', MultinomialNB())])
             else:
-                pipe = Pipeline([('CV', CountVectorizer()), ('MNB', MultinomialNB())])
-        
+                pipe = Pipeline([('CV', CountVectorizer()),
+                                ('MNB', MultinomialNB())])
+
     elif mode == VM.TFIDF:
         from sklearn.feature_extraction.text import TfidfVectorizer
 
         if lemma:
             if stop_words:
-                pipe = Pipeline([('CV', TfidfVectorizer(tokenizer=LemmaTokenizer(), stop_words=stop_w)), ('MNB', MultinomialNB())])
+                pipe = Pipeline([('CV', TfidfVectorizer(
+                    tokenizer=LemmaTokenizer(), stop_words=stop_w)), ('MNB', MultinomialNB())])
             else:
-                pipe = Pipeline([('CV', TfidfVectorizer(tokenizer=LemmaTokenizer())), ('MNB', MultinomialNB())])
+                pipe = Pipeline(
+                    [('CV', TfidfVectorizer(tokenizer=LemmaTokenizer())), ('MNB', MultinomialNB())])
         else:
             if stop_words:
-                pipe = Pipeline([('CV', TfidfVectorizer(stop_words=stop_w)), ('MNB', MultinomialNB())])
+                pipe = Pipeline(
+                    [('CV', TfidfVectorizer(stop_words=stop_w)), ('MNB', MultinomialNB())])
             else:
-                pipe = Pipeline([('CV', TfidfVectorizer()), ('MNB', MultinomialNB())])
+                pipe = Pipeline([('CV', TfidfVectorizer()),
+                                ('MNB', MultinomialNB())])
 
     return pipe
-    
+
 
 ##### Classification #####
 
@@ -103,13 +114,14 @@ def naive_classification_old(train, test, mode=VM.COUNT):
 def naive_classification(train, test, pipe):
     pipe.fit(train.text, train.author)
     return pipe.predict(test.text)
-    
+
+
 def get_class_rep(train, test, predictions):
     from sklearn.metrics import classification_report
 
     author_labels = sorted(train.author.unique())
     res = classification_report(
-        test.author, predictions, labels=author_labels)
+        test.author, predictions, labels=author_labels, output_dict=True)
 
     return res
 
@@ -201,4 +213,3 @@ if False:
 
 # TODO: look at this
 # https://www.kaggle.com/colearninglounge/nlp-data-preprocessing-and-cleaning
-

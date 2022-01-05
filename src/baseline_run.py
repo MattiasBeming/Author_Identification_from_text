@@ -97,7 +97,7 @@ print("\nClassification done!")
 
 # Print results from classification report for all profiles
 print("\nResults")
-[print("Profile:", str(p), "\n", p.get_res()) for p in profiles]
+[print("Profile:", str(p), " -- Accuracy: ", p.get_acc()) for p in profiles]
 
-# Print results from classification report for all profiles
-# [print(p.get_acc()) for p in profiles]
+
+print(f"Took: {time.time()-s_time} seconds")
