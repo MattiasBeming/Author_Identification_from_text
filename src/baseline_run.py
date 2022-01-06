@@ -30,7 +30,7 @@ data = read_data(filepath)
 
 
 # Select subset of data to use
-NR_AUTHORS = 10
+NR_AUTHORS = 8
 subset_data = get_rand_rows(data, NR_AUTHORS)
 
 authors_ = np.unique(subset_data.author)
@@ -118,7 +118,16 @@ print_header("Results")
 print(f"Dataset with {len(authors_)} selected authors: "
       f"{[a for a in authors_]}\n")
 
-[print("Profile:", str(p), "| Accuracy:", p.get_acc())
- for p in picked_profiles]
+# [print("Profile:", str(p), "| Accuracy:", p.get_acc())
+# for p in picked_profiles]
+
+best_profile = picked_profiles[0]
+for p in picked_profiles:
+    print("Profile:", str(p), "| Accuracy:", p.get_acc())
+    if p.get_acc() > best_profile.get_acc():
+        best_profile = p
+
+print("\nBest Profile was:", str(best_profile),
+      "with accuracy:", best_profile.get_acc())
 
 print(f"\nTook: {time.time()-s_time} seconds")
