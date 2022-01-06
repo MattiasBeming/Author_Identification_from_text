@@ -28,17 +28,25 @@ filepath = Path(
     'data/victorian_era/dataset/Gungor_2018_VictorianAuthorAttribution_data-train.csv')
 data = read_data(filepath)
 
-# TODO: function for selecting authors per dataset? 
-# or part of profiles?
+
+# Select subset of data to use
+NR_AUTHORS = 10
+subset_data = get_rand_rows(data, NR_AUTHORS)
+
+authors_ = np.unique(subset_data.author)
+print(f"Selected {len(authors_)} authors: {[a for a in authors_]}")
+print(f"{subset_data.shape[0]} out of {data.shape[0]} rows used "
+      f"=> {100*(subset_data.shape[0]/data.shape[0]):.3}% of the data")
+
 
 SPLIT_SIZE = 0.2
-train, test = split_data(data, SPLIT_SIZE)
+train, test = split_data(subset_data, SPLIT_SIZE)
 
 ##### Pre-process Data #####
-data_os = oversample(data)
+data_os = oversample(subset_data)
 train_os, test_os = split_data(data_os, SPLIT_SIZE)
 
-data_us = undersample(data)
+data_us = undersample(subset_data)
 train_us, test_us = split_data(data_us, SPLIT_SIZE)
 
 if False:
@@ -107,6 +115,10 @@ print("Classification Complete!")
 
 # Print results from classification report for all picked profiles
 print_header("Results")
-[print("Profile:", str(p), "| Accuracy:", p.get_acc()) for p in picked_profiles]
+print(f"Dataset with {len(authors_)} selected authors: "
+      f"{[a for a in authors_]}\n")
+
+[print("Profile:", str(p), "| Accuracy:", p.get_acc())
+ for p in picked_profiles]
 
 print(f"\nTook: {time.time()-s_time} seconds")

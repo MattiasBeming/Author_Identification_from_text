@@ -94,6 +94,20 @@ def read_data(filepath):
     return data
 
 
+def get_rand_rows(data, nr_authors):
+    unique_authors = np.unique(data.author)
+    nr_unique_authors = len(unique_authors)
+
+    nr_authors_to_draw = max(
+        min(nr_authors, nr_unique_authors), 2)  # Minimum 2 authors
+
+    np.random.seed(69)
+    rand_authors = np.random.choice(
+        unique_authors, nr_authors_to_draw, replace=False)
+
+    return data.loc[data.author.isin(rand_authors)]
+
+
 def split_data(data, split=0.2):
     # stratify:
     # rel. class frequencies is approx. preserved in each train, test fold
@@ -163,6 +177,7 @@ def print_header(header):
     print(f"# {'=' * (n + 4)} #")
     print("#" * (n + 8))
     print()
+
 
 def pick_multiple_profiles(profiles: list):
 
