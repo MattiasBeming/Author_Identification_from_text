@@ -1,14 +1,15 @@
 import nltk
 from storage import *
 from utils import VectorizationMode as VM
-from utils import Profile, read_data, split_data
+from utils import *
 from baseline import *
 import time
+from pathlib import Path
 
 s_time = time.time()
 
 ##### Setup #####
-print("Setup running...")
+print_header("Setup running")
 
 
 download_path = Path('E:/Projects/Author_Identification/data/nltk')
@@ -19,12 +20,16 @@ nltk.download('wordnet', download_dir=download_path)
 nltk.download('omw-1.4', download_dir=download_path)
 nltk.download('stopwords')
 
+print("Setup Complete!")
 
 ##### Load and Pre-Process Data #####
-print("\nLoad and Process Data...")
+print_header("Load and Process Data")
 filepath = Path(
     'data/victorian_era/dataset/Gungor_2018_VictorianAuthorAttribution_data-train.csv')
 data = read_data(filepath)
+
+# TODO: function for selecting authors per dataset? 
+# or part of profiles?
 
 SPLIT_SIZE = 0.2
 train, test = split_data(data, SPLIT_SIZE)
@@ -41,8 +46,10 @@ if False:
     bar_plot(train_os, "train_os")
     bar_plot(train_us, "train_us")
 
+print("Load and Process Data Complete!")
+
 ##### Create Datasets #####
-print("\nCreating Datasets...")
+print_header("Creating Datasets")
 
 DS = Dataset("Victorian Era")
 
@@ -53,8 +60,10 @@ datasets = [
 ]
 [DS.add_dataset(ds_name, tr, te) for ds_name, tr, te in datasets]
 
+print("Create Datasets Complete!")
+
 ##### Define Profiles #####
-print("\nCreating Profiles...")
+print_header("Create Profiles")
 
 profiles = []
 
@@ -71,33 +80,33 @@ profiles.extend([
 ])
 
 print(f"Created {len(profiles)} profiles")
-print(f"Took: {time.time()-s_time} seconds")
+print(f"Took: {time.time()-s_time} seconds\n")
 
 s_time = time.time()
 
-##### Classification #####
-print("\nRunning classification...")
+picked_profiles = pick_multiple_profiles(profiles)
 
-# TEMP
-profiles = [profiles[0]]
+print("\nCreate Profiles Complete!")
+
+##### Classification #####
+print_header("Running classification")
 
 # Set pipe for all profiles
 [p.set_pipe(define_pipe(p.get_mode(), p.is_lemmatized(),
-            p.is_stop_words_removed())) for p in profiles]
+            p.is_stop_words_removed())) for p in picked_profiles]
 
-# Set predictions for all profiles
+# Save predictions for all picked profiles
 [p.set_preds(naive_classification(p.get_train(), p.get_test(), p.get_pipe()))
- for p in profiles]
+ for p in picked_profiles]
 
-print("\nClassification done!")
+print("Classification Complete!")
 
-# Set results from classification report for all profiles
+# Save results from classification report for all picked profiles
 [p.set_res(get_class_rep(p.get_train(), p.get_test(), p.get_predictions()))
- for p in profiles]
+ for p in picked_profiles]
 
-# Print results from classification report for all profiles
-print("\nResults")
-[print("Profile:", str(p), " -- Accuracy: ", p.get_acc()) for p in profiles]
+# Print results from classification report for all picked profiles
+print_header("Results")
+[print("Profile:", str(p), "| Accuracy:", p.get_acc()) for p in picked_profiles]
 
-
-print(f"Took: {time.time()-s_time} seconds")
+print(f"\nTook: {time.time()-s_time} seconds")

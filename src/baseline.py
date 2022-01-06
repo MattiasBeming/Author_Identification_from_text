@@ -1,10 +1,7 @@
 
-# from storage import *
-import matplotlib.pyplot as plt
 from utils import VectorizationMode as VM
 import numpy as np
 import pandas as pd
-from pathlib import Path
 
 
 ##### Preprocess #####
@@ -127,45 +124,7 @@ def get_class_rep(train, test, predictions):
 
 
 ##### Over under-spamling #####
-
-def oversample(data):
-    from imblearn.over_sampling import RandomOverSampler
-    ros = RandomOverSampler(random_state=69)
-
-    # Oversample
-    temp_data = np.array(data.text).reshape(-1, 1)  # transpose
-    data_text_oversample, data_author_oversample = \
-        ros.fit_resample(temp_data, data.author)
-
-    # convert to pandas series again
-    data_text_oversample = pd.Series(data_text_oversample.flatten())
-
-    # Add to new dataframe
-    data_oversample = pd.DataFrame(
-        {"text": data_text_oversample, "author": data_author_oversample})
-
-    return data_oversample
-
-
-def undersample(data):
-    from imblearn.under_sampling import RandomUnderSampler
-    rus = RandomUnderSampler(random_state=69)
-
-    # Undersample
-    temp_data = np.array(data.text).reshape(-1, 1)  # transpose
-    data_text_undersample, data_author_undersample = \
-        rus.fit_resample(temp_data, data.author)
-
-    # convert to pandas series again
-    data_text_undersample = pd.Series(data_text_undersample.flatten())
-
-    # Add to new dataframe
-    data_undersample = pd.DataFrame(
-        {"text": data_text_undersample, "author": data_author_undersample})
-
-    return data_undersample
-
-
+# TODO: Does not work -- check if possible
 def over_undersampling(data):
     print("over-undersampling")
     from imblearn.combine import SMOTETomek
@@ -185,14 +144,6 @@ def over_undersampling(data):
 
     return data_ousample
 
-##### Bar plots #####
-
-
-def bar_plot(data, title=""):
-    data.author.value_counts().plot(kind='bar')
-    plt.title(title)
-    plt.show()
-    return
 
 
 ##### Load and split data #####
