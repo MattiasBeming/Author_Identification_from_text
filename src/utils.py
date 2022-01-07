@@ -1,5 +1,4 @@
 from enum import Enum
-import pandas as pd
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import numpy as np
@@ -19,15 +18,26 @@ class VectorizationMode(Enum):
 class Profile:
     def __init__(self, ds_name, DS, lemmatize,
                  remove_stop_words, mode=VectorizationMode.COUNT):
+        # From argument-list
         self.ds_name = ds_name
         self.DS = DS
         self.lemmatize = lemmatize
         self.remove_stop_words = remove_stop_words
         self.mode = mode
 
-        self.pipe = None
+        # Baseline
+        self.baseline_pipe = None
+        self.baseline_res = None
+
+        # Keras
+        self.x_train = None
+        self.y_train = DS.get_train(ds_name).author
+        self.x_test = None
+        self.y_test = DS.get_test(ds_name).author
+        self.vectorizer = None
+
+        # All
         self.predictions = None
-        self.res = None
 
     def __str__(self):
         return (
@@ -37,14 +47,14 @@ class Profile:
             + self.mode.name
         )
 
-    def set_pipe(self, pipe):
-        self.pipe = pipe
+    def set_baseline_pipe(self, baseline_pipe):
+        self.baseline_pipe = baseline_pipe
 
     def set_preds(self, preds):
         self.predictions = preds
 
-    def set_res(self, res):
-        self.res = res
+    def set_baseline_res(self, baseline_res):
+        self.baseline_res = baseline_res
 
     def get_train(self):
         return self.DS.get_train(self.ds_name)
@@ -64,30 +74,59 @@ class Profile:
     def get_mode(self):
         return self.mode
 
-    def get_pipe(self):
-        if self.pipe is None:
+    def get_baseline_pipe(self):
+        if self.baseline_pipe is None:
             raise ValueError('Pipe not set')
-        return self.pipe
+        return self.baseline_pipe
 
     def get_predictions(self):
         if self.predictions is None:
             raise ValueError('Predictions not set')
         return self.predictions
 
-    def get_res(self):
-        if self.res is None:
+    def get_baseline_res(self):
+        if self.baseline_res is None:
             raise ValueError('Res not set')
-        return self.res
+        return self.baseline_res
 
-    def get_acc(self):
-        if self.res is None:
+    def get_baseline_acc(self):
+        if self.baseline_res is None:
             raise ValueError('Res not set')
-        return self.res['accuracy']
+        return self.baseline_res['accuracy']
+
+    # Keras
+    def set_vectorizer(self, vectorizer):
+        self.vectorizer = vectorizer
+        self.fit_transform()
+
+    def fit_transform(self):
+        if self.vectorizer is None:
+            raise ValueError('Vectorizer not set')
+        self.vectorizer.fit(self.get_train().text)
+        self.x_train = self.vectorizer.transform(self.get_train().text)
+        self.x_test = self.vectorizer.transform(self.get_test().text)
+
+    def get_transformed_x_train(self):
+        if self.x_train is None:
+            raise ValueError('Train data not transformed via vectorizer')
+        return self.x_train
+
+    def get_transformed_y_train(self):
+        return self.y_train
+
+    def get_transformed_x_test(self):
+        if self.x_test is None:
+            raise ValueError('Test data not transformed via vectorizer')
+        return self.x_test
+
+    def get_transformed_y_test(self):
+        return self.y_test
 
 
 #####################
 ##### Functions #####
 #####################
+
 
 def read_data(filepath):
     data = pd.read_csv(filepath, encoding="ISO-8859-1")

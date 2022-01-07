@@ -20,93 +20,53 @@ class LemmaTokenizer:
 
 ##### Pipe #####
 
-def define_pipe(mode=VM.COUNT, lemma=False, stop_words=False):
-    from sklearn.pipeline import Pipeline
-    from sklearn.naive_bayes import MultinomialNB
+def get_vectorizer(mode=VM.COUNT, lemma=False, stop_words=False):
+    from sklearn.feature_extraction.text import \
+        CountVectorizer, TfidfVectorizer
 
     if stop_words:
         from nltk.corpus import stopwords
         stop_w = stopwords.words('english')
 
     if mode == VM.COUNT:
-        from sklearn.feature_extraction.text import CountVectorizer
-
         if lemma:
             if stop_words:
-                pipe = Pipeline([('CV', CountVectorizer(
-                    tokenizer=LemmaTokenizer(), stop_words=stop_w)), ('MNB', MultinomialNB())])
+                vectorizer = ('CV', CountVectorizer(
+                    tokenizer=LemmaTokenizer(), stop_words=stop_w))
             else:
-                pipe = Pipeline(
-                    [('CV', CountVectorizer(tokenizer=LemmaTokenizer())), ('MNB', MultinomialNB())])
+                vectorizer = ('CV', CountVectorizer(
+                    tokenizer=LemmaTokenizer()))
         else:
             if stop_words:
-                pipe = Pipeline(
-                    [('CV', CountVectorizer(stop_words=stop_w)), ('MNB', MultinomialNB())])
+                vectorizer = ('CV', CountVectorizer(stop_words=stop_w))
             else:
-                pipe = Pipeline([('CV', CountVectorizer()),
-                                ('MNB', MultinomialNB())])
-
+                vectorizer = ('CV', CountVectorizer())
     elif mode == VM.TFIDF:
-        from sklearn.feature_extraction.text import TfidfVectorizer
-
         if lemma:
             if stop_words:
-                pipe = Pipeline([('CV', TfidfVectorizer(
-                    tokenizer=LemmaTokenizer(), stop_words=stop_w)), ('MNB', MultinomialNB())])
+                vectorizer = ('TFIDF', TfidfVectorizer(
+                    tokenizer=LemmaTokenizer(), stop_words=stop_w))
             else:
-                pipe = Pipeline(
-                    [('CV', TfidfVectorizer(tokenizer=LemmaTokenizer())), ('MNB', MultinomialNB())])
+                vectorizer = ('TFIDF', TfidfVectorizer(
+                    tokenizer=LemmaTokenizer()))
         else:
             if stop_words:
-                pipe = Pipeline(
-                    [('CV', TfidfVectorizer(stop_words=stop_w)), ('MNB', MultinomialNB())])
+                vectorizer = ('TFIDF', TfidfVectorizer(stop_words=stop_w))
             else:
-                pipe = Pipeline([('CV', TfidfVectorizer()),
-                                ('MNB', MultinomialNB())])
+                vectorizer = ('TFIDF', TfidfVectorizer())
 
-    return pipe
+    return vectorizer
+
+
+def define_pipe(mode=VM.COUNT, lemma=False, stop_words=False):
+    from sklearn.pipeline import Pipeline
+    from sklearn.naive_bayes import MultinomialNB
+
+    vect = get_vectorizer(mode, lemma, stop_words)
+    return Pipeline([vect, ('MNB', MultinomialNB())])
 
 
 ##### Classification #####
-
-def naive_classification_old(train, test, mode=VM.COUNT):
-    print("Classification")
-    from sklearn.pipeline import Pipeline
-    from sklearn.naive_bayes import MultinomialNB
-    from sklearn.metrics import classification_report
-
-    if mode == VM.COUNT:
-        print("Count vectorizer")
-        from sklearn.feature_extraction.text import CountVectorizer
-        # pipe = Pipeline([('CV', CountVectorizer(tokenizer=LemmaTokenizer())), ('MNB', MultinomialNB())])
-        pipe = Pipeline([('CV', CountVectorizer()), ('MNB', MultinomialNB())])
-
-        pipe.fit(train.text, train.author)
-
-        predictions = pipe.predict(test.text)
-        author_labels = sorted(train.author.unique())
-        res = classification_report(
-            test.author, predictions, labels=author_labels)
-    elif mode == VM.TFIDF:
-        print("Tfidf vectorizer")
-        from sklearn.feature_extraction.text import TfidfVectorizer
-        tfidf_vect = TfidfVectorizer()  # stop_words='english')
-
-        train_tfidf = tfidf_vect.fit_transform(train.text)
-
-        clf = MultinomialNB()
-        clf.fit(train_tfidf, train.author)
-
-        test_tfidf = tfidf_vect.transform(test.text)
-        predictions = clf.predict(test_tfidf)
-
-        author_labels = sorted(train.author.unique())
-        res = classification_report(
-            test.author, predictions, labels=author_labels)
-
-    print(res)
-    return res
-
 
 def naive_classification(train, test, pipe):
     pipe.fit(train.text, train.author)
@@ -119,7 +79,6 @@ def get_class_rep(train, test, predictions):
     author_labels = sorted(train.author.unique())
     res = classification_report(
         test.author, predictions, labels=author_labels, output_dict=True)
-
     return res
 
 
@@ -145,7 +104,6 @@ def over_undersampling(data):
     return data_ousample
 
 
-
 ##### Load and split data #####
 # over under-sampling
 # https://github.com/scikit-learn-contrib/imbalanced-learn
@@ -156,7 +114,6 @@ def over_undersampling(data):
 # tfidf - 0.51
 # count - 0.87
 # count,lemma - 0.85
-
 
 if False:
     data = read_data(filepath)

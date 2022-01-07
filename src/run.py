@@ -92,34 +92,33 @@ print(f"Took: {time.time()-s_time} seconds\n")
 
 s_time = time.time()
 
-picked_profiles = pick_multiple_profiles(profiles)
+picked_profiles = [profiles[0]]  # pick_multiple_profiles(profiles)
 
 print("\nCreate Profiles Complete!")
 
 ##### Classification #####
 print_header("Running classification")
 
-# Set pipe for all profiles
-[p.set_baseline_pipe(define_pipe(p.get_mode(), p.is_lemmatized(),
-                                 p.is_stop_words_removed())) for p in picked_profiles]
+# Set vectorizer for all profiles (which runs fit-transform)
+for p in picked_profiles:
+    name, vect = get_vectorizer(p.get_mode(),
+                                p.is_lemmatized(),
+                                p.is_stop_words_removed())
+    p.set_vectorizer(vect)
 
 # Save predictions for all picked profiles
-[p.set_preds(naive_classification(p.get_train(), p.get_test(), p.get_baseline_pipe()))
- for p in picked_profiles]
+# TODO Run classification
 
 print("Classification Complete!")
 
 # Save results from classification report for all picked profiles
-[p.set_baseline_res(get_class_rep(p.get_train(), p.get_test(), p.get_predictions()))
- for p in picked_profiles]
+
+exit()
 
 # Print results from classification report for all picked profiles
 print_header("Results")
 print(f"Dataset with {len(authors_)} selected authors: "
       f"{[a for a in authors_]}\n")
-
-# [print("Profile:", str(p), "| Accuracy:", p.get_acc())
-# for p in picked_profiles]
 
 best_profile = picked_profiles[0]
 for p in picked_profiles:
