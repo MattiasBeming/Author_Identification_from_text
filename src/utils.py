@@ -4,11 +4,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import re
-
+from tensorflow.keras.utils import to_categorical
 
 ###################
 ##### Classes #####
 ###################
+
 
 class VectorizationMode(Enum):
     COUNT = 0
@@ -17,7 +18,8 @@ class VectorizationMode(Enum):
 
 class Profile:
     def __init__(self, ds_name, DS, lemmatize,
-                 remove_stop_words, mode=VectorizationMode.COUNT):
+                 remove_stop_words, mode=VectorizationMode.COUNT,
+                 nr_authors=None):
         # From argument-list
         self.ds_name = ds_name
         self.DS = DS
@@ -30,11 +32,13 @@ class Profile:
         self.baseline_res = None
 
         # Keras
+        self.nr_authors = nr_authors
         self.x_train = None
-        self.y_train = DS.get_train(ds_name).author
+        self.y_train = to_categorical(DS.get_train(ds_name).author, nr_authors)
         self.x_test = None
-        self.y_test = DS.get_test(ds_name).author
+        self.y_test = to_categorical(DS.get_test(ds_name).author, nr_authors)
         self.vectorizer = None
+        self.model = None
 
         # All
         self.predictions = None
@@ -86,15 +90,15 @@ class Profile:
 
     def get_baseline_res(self):
         if self.baseline_res is None:
-            raise ValueError('Res not set')
+            raise ValueError('Baseline res not set')
         return self.baseline_res
 
     def get_baseline_acc(self):
         if self.baseline_res is None:
-            raise ValueError('Res not set')
+            raise ValueError('Baseline res not set')
         return self.baseline_res['accuracy']
 
-    # Keras
+    ### Keras ###
     def set_vectorizer(self, vectorizer):
         self.vectorizer = vectorizer
         self.fit_transform()
@@ -106,22 +110,39 @@ class Profile:
         self.x_train = self.vectorizer.transform(self.get_train().text)
         self.x_test = self.vectorizer.transform(self.get_test().text)
 
-    def get_transformed_x_train(self):
+    def set_model(self, model):
+        self.model = model
+
+    def get_model(self):
+        return self.model
+
+    def get_transformed_x_train(self, as_numpy=False):
         if self.x_train is None:
             raise ValueError('Train data not transformed via vectorizer')
-        return self.x_train
+        return self.x_train.todense() if as_numpy else self.x_train
 
     def get_transformed_y_train(self):
         return self.y_train
 
-    def get_transformed_x_test(self):
+    def get_transformed_x_test(self, as_numpy=False):
         if self.x_test is None:
             raise ValueError('Test data not transformed via vectorizer')
-        return self.x_test
+        return self.x_test.todense() if as_numpy else self.x_test
 
     def get_transformed_y_test(self):
         return self.y_test
 
+    def set_history(self, history):
+        self.history = history
+
+    def get_history(self):
+        return self.history
+
+    def set_acc(self, acc):
+        self.acc = acc
+
+    def get_acc(self):
+        return self.acc
 
 #####################
 ##### Functions #####

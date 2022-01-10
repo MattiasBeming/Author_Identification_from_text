@@ -1,4 +1,4 @@
-from keras.models import Sequential
+import tensorflow as tf
 from keras import layers
 from keras.backend import clear_session
 import matplotlib.pyplot as plt
@@ -8,45 +8,44 @@ def clear():
     # Clear session - Reset weights of last training
     clear_session()
 
-def set_model():
-    pass
 
-def code(train, test):
-    # TEMPORARY
-    X_train = train.text
-    Y_train = train.author
-    X_test = test.text
-    Y_test = test.author
-
-    input_dim = X_train.shape[1]  # Number of features
-    input_dim = 1  # Number of features
-
+def get_model(input_dim, output_dim):
     # Define model
-    model = Sequential()
-    model.add(layers.Dense(10, input_dim=input_dim, activation='relu'))
-    model.add(layers.Dense(1, activation='sigmoid'))
+    inputs = tf.keras.Input(shape=(input_dim,),
+                            sparse=True, dtype="int64")
 
-    # Run classification
-    model.compile(loss='binary_crossentropy', 
-              optimizer='adam', 
-              metrics=['accuracy'])
+    x = layers.Dense(128, input_dim=input_dim, activation="relu")(inputs)
+    predictions = layers.Dense(
+        output_dim, activation="sigmoid", name="predictions")(x)
+
+    model = tf.keras.Model(inputs, predictions)
+
+    return model
+
+
+def compile(model):
+    model.compile(loss="categorical_crossentropy",
+                  optimizer="adam",
+                  metrics=['acc'])
     model.summary()
 
-    # Plot
-    history = model.fit(X_train, y_train,
-                    epochs=100,
-                    verbose=False,
-                    validation_data=(X_test, y_test),
-                    batch_size=10)
 
-    # Evaluate accuracy
-    loss, accuracy = model.evaluate(X_train, y_train, verbose=False)
-    print("Training Accuracy: {:.4f}".format(accuracy))
-    loss, accuracy = model.evaluate(X_test, y_test, verbose=False)
-    print("Testing Accuracy:  {:.4f}".format(accuracy))
-
+def fit(model, x_train, y_train, epochs=1):
+    history = model.fit(
+        x=x_train,
+        y=y_train,
+        batch_size=64,
+        # validation_data=validation,  # TODO
+        validation_split=0.15,
+        epochs=epochs
+    )
+    return history
 
 
+def evaluate(model, X_ds, y_ds):
+    _, acc = model.evaluate(X_ds, y_ds, verbose=False, batch_size=64)
+    print("Accuracy: {:.4f}".format(acc))
+    return acc
 
 
 def plot_history(history):
@@ -61,10 +60,15 @@ def plot_history(history):
     plt.subplot(1, 2, 1)
     plt.plot(x, acc, 'b', label='Training acc')
     plt.plot(x, val_acc, 'r', label='Validation acc')
+    plt.ylabel('Accuracy')
+    plt.xlabel('Epoch')
     plt.title('Training and validation accuracy')
     plt.legend()
     plt.subplot(1, 2, 2)
     plt.plot(x, loss, 'b', label='Training loss')
     plt.plot(x, val_loss, 'r', label='Validation loss')
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
     plt.title('Training and validation loss')
     plt.legend()
+    plt.show()

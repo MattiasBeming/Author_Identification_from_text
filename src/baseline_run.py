@@ -18,7 +18,7 @@ nltk.data.path.append(download_path)
 nltk.download('punkt', download_dir=download_path)
 nltk.download('wordnet', download_dir=download_path)
 nltk.download('omw-1.4', download_dir=download_path)
-nltk.download('stopwords')
+nltk.download('stopwords', download_dir=download_path)
 
 print("Setup Complete!")
 
@@ -90,14 +90,13 @@ profiles.extend([
 print(f"Created {len(profiles)} profiles")
 print(f"Took: {time.time()-s_time} seconds\n")
 
-s_time = time.time()
-
 picked_profiles = pick_multiple_profiles(profiles)
 
 print("\nCreate Profiles Complete!")
 
 ##### Classification #####
 print_header("Running classification")
+s_time = time.time()
 
 # Set pipe for all profiles
 [p.set_baseline_pipe(define_pipe(p.get_mode(), p.is_lemmatized(),
