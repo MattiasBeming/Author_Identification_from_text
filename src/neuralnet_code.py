@@ -30,20 +30,21 @@ def compile(model):
     model.summary()
 
 
-def fit(model, x_train, y_train, epochs=1):
+def fit(model, x_train, y_train,
+        epochs=1, batch_size=64,
+        validation_split=0.15):
     history = model.fit(
         x=x_train,
         y=y_train,
-        batch_size=64,
-        # validation_data=validation,  # TODO
-        validation_split=0.15,
+        batch_size=batch_size,
+        validation_split=validation_split,
         epochs=epochs
     )
     return history
 
 
-def evaluate(model, X_ds, y_ds):
-    _, acc = model.evaluate(X_ds, y_ds, verbose=False, batch_size=64)
+def evaluate(model, X_ds, y_ds, batch_size=64):
+    _, acc = model.evaluate(X_ds, y_ds, verbose=False, batch_size=batch_size)
     print("Accuracy: {:.4f}".format(acc))
     return acc
 

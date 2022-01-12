@@ -40,6 +40,10 @@ def _pad_data(x_train, x_test, plot=False):
 
 ##### Variables #####
 
+# Dataset filepath
+PATH_DS = Path(
+    'data/victorian_era/dataset/Gungor_2018_VictorianAuthorAttribution_data-train.csv')
+
 # If stop words should be removed
 SW = False
 
@@ -91,9 +95,8 @@ PLOT_ROW_LEN_DIST = False
 ##### Load and Pre-Process Data #####
 print_header("Setup: Load and Process Data")
 s_time = time.time()
-filepath = Path(
-    'data/victorian_era/dataset/Gungor_2018_VictorianAuthorAttribution_data-train.csv')
-data = read_data(filepath)
+
+data = read_data(PATH_DS)
 
 if SW:
     s_t = time.time()
