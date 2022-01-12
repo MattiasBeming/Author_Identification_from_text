@@ -43,6 +43,9 @@ def _pad_data(x_train, x_test, plot=False):
 # If stop words should be removed
 SW = False
 
+# Path where the stop-word-data should be stored
+DL_PATH_SW = Path('E:/Projects/Author_Identification/data/nltk')
+
 # Select nr of authors to use from dataset to only use a subset of the data
 NR_AUTHORS = 8
 
@@ -53,7 +56,7 @@ SPLIT_SIZE = 0.2
 VALIDATION_SPLIT = 0.15
 
 # How many epochs to train for
-EPOCHS = 4
+EPOCHS = 50
 
 # Batch size to train/evaluate with
 BS = 64
@@ -64,6 +67,9 @@ PRE_TRAINED_EMB = True
 
 # Embedding vectors available: 50, 100, 200, 300 (GloVe)
 EMB_VEC = 300
+
+# Path to the pre-trained embeddings
+PATH_EMB = Path(f"data/glove.6B/glove.6B.{EMB_VEC}d.txt")
 
 # Embedding dim used if embedding is not pre-trained else
 # EMB_VEC is used as embedding dimension
@@ -81,6 +87,7 @@ DROPOUT_LSTM = 0.2
 PLOT_HISTORY = False
 PLOT_ROW_LEN_DIST = False
 
+
 ##### Load and Pre-Process Data #####
 print_header("Setup: Load and Process Data")
 s_time = time.time()
@@ -91,13 +98,13 @@ data = read_data(filepath)
 if SW:
     s_t = time.time()
     import nltk
-    download_path = Path('E:/Projects/Author_Identification/data/nltk')
-    nltk.data.path.append(download_path)
-    nltk.download('stopwords', download_dir=download_path)
+    nltk.data.path.append(DL_PATH_SW)
+    nltk.download('stopwords', download_dir=DL_PATH_SW)
 
     # use 'set' to make python faster (takes 10x longer otherwise)
     stop_w = set(nltk.corpus.stopwords.words('english'))
 
+    # Remove stop words
     data.text = data.text.apply(lambda x: ' '.join(
         [word for word in x.split() if word not in (stop_w)]))
 
@@ -146,8 +153,7 @@ if PRE_TRAINED_EMB:
     load_time = time.time()
     # load pre-trained embedding
     emb_ind = dict()
-    file = open(
-        Path(f"data/glove.6B/glove.6B.{EMB_VEC}d.txt"), encoding="utf8")
+    file = open(PATH_EMB, encoding="utf8")
     for line in file:
         line_ = line.split()
         coeff = np.asarray(line_[1:], dtype='float32')
