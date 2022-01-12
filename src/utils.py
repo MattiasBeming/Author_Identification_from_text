@@ -176,6 +176,17 @@ def split_data(data, split=0.2):
     return train, test
 
 
+def get_set_of_rowlengths(data):
+    set_ = {}
+    for w in data:
+        len_ = len(w)
+        if len_ not in set_:
+            set_[len_] = 1
+        else:
+            set_[len_] += 1
+    return set_
+
+
 ##### Bar plots #####
 
 def bar_plot(data, title=""):
@@ -185,7 +196,13 @@ def bar_plot(data, title=""):
     return
 
 
+def plot_row_length_distribution(set_):
+    plt.bar(list(set_.keys()), list(set_.values()))
+    plt.show()
+    return
+
 ##### Over under-spamling #####
+
 
 def oversample(data):
     from imblearn.over_sampling import RandomOverSampler
