@@ -3,7 +3,7 @@ from storage import *
 from utils import VectorizationMode as VM
 from utils import *
 from baseline import *
-from keras_code import *
+from neuralnet_code import *
 import time
 from pathlib import Path
 
@@ -119,7 +119,7 @@ print("Set vectorizer for all profiles | Complete!")
 
 # Set model for all profiles
 for p in picked_profiles:
-    p.set_model(get_model(
+    p.set_model(get_NN_model(
         input_dim=p.get_transformed_x_train().shape[1],
         output_dim=p.get_transformed_y_train().shape[1]))
 

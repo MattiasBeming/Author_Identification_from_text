@@ -9,7 +9,7 @@ def clear():
     clear_session()
 
 
-def get_model(input_dim, output_dim):
+def get_NN_model(input_dim, output_dim):
     # Define model
     inputs = tf.keras.Input(shape=(input_dim,),
                             sparse=True, dtype="int64")
