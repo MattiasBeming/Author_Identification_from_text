@@ -26,7 +26,7 @@ SPLIT_SIZE = 0.2
 VALIDATION_SPLIT = 0.15
 
 # How many epochs to train for
-EPOCHS = 2
+EPOCHS = 14
 
 # Batch size to train/evaluate with
 BS = 64
@@ -34,7 +34,7 @@ BS = 64
 # If plots should be shown
 PLOT_AUTHOR_DIST = False
 PLOT_BEST_PROFILE = False
-PLOT_HISTORY = False
+PLOT_HISTORY = True
 
 ##### Setup #####
 print_header("Setup running")
@@ -166,7 +166,7 @@ print(f"Dataset with {len(authors_)} selected authors: "
 best_profile = picked_profiles[0]
 for p in picked_profiles:
     print("Profile:", str(p), "| Accuracy:", p.get_acc())
-    if PLOT_BEST_PROFILE:
+    if PLOT_HISTORY:
         plot_history(p.get_history())
 
     if p.get_acc() > best_profile.get_acc():
@@ -177,5 +177,5 @@ print("\nBest Profile was:", str(best_profile),
 
 print(f"\nTook: {time.time()-s_time} seconds")
 
-if PLOT_HISTORY:
+if PLOT_BEST_PROFILE:
     plot_history(best_profile.get_history())
