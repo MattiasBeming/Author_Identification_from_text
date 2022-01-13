@@ -128,17 +128,17 @@ def print_all(profiles):
     print("#################################################################")
     print()
 
+    p_0 = profiles[0]
+    print("\n#################################################################")
+    print("Profile:")
+    print(f"OS={p_0.get_os()}, SW={p_0.get_sw()}, L={p_0.get_l()}, "
+          f"PRE_TRAINED_EMB={p_0.get_pte()}, \n"
+          f"BI_DIR_LSTM={p_0.get_bdl()}")
+
+    print(f"{p_0.get_model_sum()}\n")
+
     for p in profiles:
-        print("\n#################################################################")
-        print(f"Profile: {str(p)}:")
-        print(f"OS={p.get_os()}, SW={p.get_sw()}, L={p.get_l()}, "
-              f"PRE_TRAINED_EMB={p.get_pte()}, \n"
-              f"BI_DIR_LSTM={p.get_bdl()}, NR_AUTHORS={p.get_nr_authors()}")
-
-        print(f"{p.get_model_sum()}")
-
-        print(f"Test Accuracy: {p.get_acc():.6f}\n")
-
+        print(f"{str(p)}: Test Accuracy: {p.get_acc():.6f}")
         plot_history(p.get_history())
 
 
@@ -153,21 +153,16 @@ PLOT_HISTORY = False
 NR_AUTHORS = [4, 6, 8, 10, 14, 18, 24, 30, 35, 45]  # 10
 
 # Chosen best profile from execution of lstm_run.py
-OS = [True]
-SW = [False]
-L = [True]
-PRE_TRAINED_EMB = [True]
-BI_DIR_LSTM = [False]
+OS = True
+SW = False
+L = True
+PRE_TRAINED_EMB = True
+BI_DIR_LSTM = False
 
 profiles = []
 
 profiles.extend([
-    P(os, sw, l, pte, bdl, nrA)
-    for sw in SW
-    for l in L
-    for pte in PRE_TRAINED_EMB
-    for bdl in BI_DIR_LSTM
-    for os in OS
+    P(OS, SW, L, PRE_TRAINED_EMB, BI_DIR_LSTM, nrA)
     for nrA in NR_AUTHORS
 ])
 
