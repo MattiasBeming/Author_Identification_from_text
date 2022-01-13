@@ -153,7 +153,7 @@ PLOT_HISTORY = False
 NR_AUTHORS = [4, 6, 8, 10, 14, 18, 24, 30, 35, 45]  # 10
 
 # Chosen best profile from execution of lstm_run.py
-OS = [False]
+OS = [True]
 SW = [False]
 L = [True]
 PRE_TRAINED_EMB = [True]
