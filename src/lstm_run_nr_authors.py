@@ -62,12 +62,13 @@ PLOT_ROW_LEN_DIST = False
 
 
 class P():
-    def __init__(self, os, sw, l, pte, bdl):
+    def __init__(self, os, sw, l, pte, bdl, nr_authors):
         self.os = os
         self.sw = sw
         self.l = l
         self.pte = pte
         self.bdl = bdl
+        self.nr_authors = nr_authors
 
         self.model_sum = None
         self.acc = None
@@ -79,8 +80,9 @@ class P():
             + ("OS_" if self.os else "")
             + ("sw_" if self.sw else "")
             + ("l_" if self.l else "")
-            + ("pre" if self.pte else "")
-        ).strip("_")
+            + ("pre_" if self.pte else "")
+            + f"{self.nr_authors}"
+        )
 
     def set_model_sum(self, ms):
         self.model_sum = ms
@@ -106,6 +108,9 @@ class P():
     def get_bdl(self):
         return self.bdl
 
+    def get_nr_authors(self):
+        return self.nr_authors
+
     def get_model_sum(self):
         return self.model_sum
 
@@ -126,12 +131,13 @@ def print_all(profiles):
     for p in profiles:
         print("\n#################################################################")
         print(f"Profile: {str(p)}:")
-        print(f"OS={p.get_os()}, SW={p.get_sw()}, L={p.get_l()}, PRE_TRAINED_EMB={p.get_pte()}, "
-              f"BI_DIR_LSTM={p.get_bdl()}")
+        print(f"OS={p.get_os()}, SW={p.get_sw()}, L={p.get_l()}, "
+              f"PRE_TRAINED_EMB={p.get_pte()}, \n"
+              f"BI_DIR_LSTM={p.get_bdl()}, NR_AUTHORS={p.get_nr_authors()}")
 
         print(f"{p.get_model_sum()}")
 
-        print(f"Test Accuracy: {p.get_acc():.4f}\n")
+        print(f"Test Accuracy: {p.get_acc():.6f}\n")
 
         plot_history(p.get_history())
 
@@ -143,21 +149,26 @@ EPOCHS = 50
 # This is plotted in the end (print_all(picked_profiles))
 PLOT_HISTORY = False
 
-OS = [True, False]
-SW = [True, False]
-L = [True, False]
-PRE_TRAINED_EMB = [True, False]
-BI_DIR_LSTM = [True, False]
+# Select nr of authors to use from dataset to only use a subset of the data
+NR_AUTHORS = [4, 6, 8, 10, 14, 18, 24, 30, 35, 45]  # 10
+
+# Chosen best profile from execution of lstm_run.py
+OS = [False]
+SW = [False]
+L = [True]
+PRE_TRAINED_EMB = [True]
+BI_DIR_LSTM = [False]
 
 profiles = []
 
 profiles.extend([
-    P(os, sw, l, pte, bdl)
+    P(os, sw, l, pte, bdl, nrA)
     for sw in SW
     for l in L
     for pte in PRE_TRAINED_EMB
     for bdl in BI_DIR_LSTM
     for os in OS
+    for nrA in NR_AUTHORS
 ])
 
 picked_profiles = pick_multiple_profiles(profiles)
@@ -165,7 +176,7 @@ picked_profiles = pick_multiple_profiles(profiles)
 for p in picked_profiles:
     model_sum, acc, history = \
         lstm_run(PATH_DS, p.get_os(), p.get_sw(), p.get_l(),
-                 DL_PATH_NLTK, NR_AUTHORS,
+                 DL_PATH_NLTK, p.get_nr_authors(),
                  SPLIT_SIZE,
                  VALIDATION_SPLIT, EPOCHS,
                  BS, p.get_pte(), EMB_VEC, PATH_EMB,
