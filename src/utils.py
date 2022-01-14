@@ -34,9 +34,9 @@ class Profile:
         # Keras
         self.nr_authors = nr_authors
         self.x_train = None
-        self.y_train = to_categorical(DS.get_train(ds_name).author, nr_authors)
+        self.y_train = to_categorical(DS.get_train(ds_name).author)
         self.x_test = None
-        self.y_test = to_categorical(DS.get_test(ds_name).author, nr_authors)
+        self.y_test = to_categorical(DS.get_test(ds_name).author)
         self.vectorizer = None
         self.model = None
 
@@ -45,11 +45,12 @@ class Profile:
 
     def __str__(self):
         return (
-            self.ds_name + "_"
+            f"{self.ds_name}_"
             + ("l_" if self.lemmatize else "")
             + ("sw_" if self.remove_stop_words else "")
-            + self.mode.name
-        )
+            + (f"{self.mode.name}_")
+            + (str(self.nr_authors) if self.nr_authors is not None else "")
+        ).strip("_")
 
     def set_baseline_pipe(self, baseline_pipe):
         self.baseline_pipe = baseline_pipe

@@ -100,19 +100,24 @@ profiles = []
 lemma = [False, True]
 stop_words = [False, True]
 modes = [VM.COUNT, VM.TFIDF]
+# nr_authors = [4, 8, 12]
 
 profiles.extend([
-    Profile(ds_name, DS, l, sw, mode)
+    Profile(ds_name, DS, l, sw, mode, NR_AUTHORS)
     for ds_name, _, __ in datasets
     for l in lemma
     for sw in stop_words
     for mode in modes
+    # for nr_a in nr_authors
 ])
 
 print(f"Created {len(profiles)} profiles")
 print(f"Took: {time.time()-s_time} seconds\n")
 
 picked_profiles = pick_multiple_profiles(profiles)
+
+if not picked_profiles:
+    exit()
 
 print("\nCreate Profiles Complete!")
 
