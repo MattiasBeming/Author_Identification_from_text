@@ -214,7 +214,7 @@ def lstm_run(PATH_DS, OS, SW, L, DL_PATH_NLTK, NR_AUTHORS,
 
     loss, acc = model.evaluate(x_test, y_test,
                                verbose=False, batch_size=BS)
-    print("\nTest Accuracy: {:.4f}".format(acc))
+    print("\nTest Accuracy: {:.5f}".format(acc))
 
     print(f"\nClassification took: {time.time()-s_time} seconds")
 

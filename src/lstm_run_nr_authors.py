@@ -26,9 +26,6 @@ SPLIT_SIZE = 0.2
 # Splits data when training from train dataset into train and validation
 VALIDATION_SPLIT = 0.15
 
-# How many epochs to train for
-EPOCHS = 50
-
 # Batch size to train/evaluate with
 BS = 64
 
@@ -55,7 +52,6 @@ DROPOUT_LAYER = 0.4
 DROPOUT_LSTM = 0.2
 
 # Plots
-PLOT_HISTORY = False
 PLOT_ROW_LEN_DIST = False
 
 #### Class #####
@@ -138,12 +134,13 @@ def print_all(profiles):
     print(f"{p_0.get_model_sum()}\n")
 
     for p in profiles:
-        print(f"{str(p)}: Test Accuracy: {p.get_acc():.6f}")
+        print(f"{str(p)}: Test Accuracy: {p.get_acc():.5f}")
         plot_history(p.get_history())
 
 
 ##### Run #####
 
+# How many epochs to train for
 EPOCHS = 50
 
 # This is plotted in the end (print_all(picked_profiles))

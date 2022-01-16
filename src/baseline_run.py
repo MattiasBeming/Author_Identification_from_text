@@ -51,7 +51,6 @@ print(f"Selected {len(authors_)} authors: {[a for a in authors_]}")
 print(f"{subset_data.shape[0]} out of {data.shape[0]} rows used "
       f"=> {100*(subset_data.shape[0]/data.shape[0]):.3}% of the data")
 
-
 train, test = split_data(subset_data, SPLIT_SIZE)
 
 ##### Pre-process Data #####
@@ -106,6 +105,10 @@ picked_profiles = pick_multiple_profiles(profiles)
 
 print("\nCreate Profiles Complete!")
 
+if not picked_profiles:
+    print("No profiles picked, exiting")
+    exit()
+
 ##### Classification #####
 print_header("Running classification")
 s_time = time.time()
@@ -128,7 +131,6 @@ print("Classification Complete!")
 print_header("Results")
 print(f"Dataset with {len(authors_)} selected authors: "
       f"{[a for a in authors_]}\n")
-
 
 best_profile = picked_profiles[0]
 for p in picked_profiles:

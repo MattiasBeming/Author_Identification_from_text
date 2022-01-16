@@ -1,4 +1,3 @@
-from lstm_run import PLOT_ROW_LEN_DIST
 from utils import *
 from baseline import *
 from neuralnet_code import plot_history
@@ -199,7 +198,7 @@ print_header("Results")
 
 loss, acc = model.evaluate(np.array(x_test), y_test,
                            verbose=False, batch_size=BS)
-print("\nTest Accuracy: {:.4f}".format(acc))
+print("\nTest Accuracy: {:.5f}".format(acc))
 
 print(f"\nClassification took: {time.time()-s_time} seconds")
 
